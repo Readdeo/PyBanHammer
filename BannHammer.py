@@ -55,6 +55,7 @@ if __name__ == "__main__":
     loops = 0
     for address in blocklist.text.splitlines():
         loops = loops + 1
+
         if address not in already_blocked:
             blocked_now = blocked_now + 1
             cmd = 'iptables -A INPUT -s {} -j DROP'.format(address)
@@ -67,10 +68,13 @@ if __name__ == "__main__":
             if time.time() - status_update_time > 60:
                 status_update_time = time.time()
                 time_str = time.strftime('%H:%M:%S', time.gmtime(time.time() - start_time))
+                est_time_sec = int(((time.time() - start_time) / loops) * blocklis_ips)
+                est_time_str = time.strftime('%H:%M:%S', time.gmtime(est_time_sec))
                 print(bcolors.OKGREEN + '')
                 print('Elapsed time: ' + time_str)
                 print('Progress: ' + str(loops) + '/' + str(blocklis_ips))
                 print(str(blocked_now) + ' ip was blocked')
+                print('Estimated time: ' + est_time_str)
                 print('' + bcolors.ENDC)
 
     time_str = time.strftime('%H:%M:%S', time.gmtime(time.time() - start_time))
