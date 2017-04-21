@@ -8,6 +8,16 @@ already_blocked = []
 already_blocked_ip = 0
 blocked_now = 0
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 if __name__ == "__main__":
     # Saving iptables rules to file
     print('Saving iptables rules to file')
@@ -41,7 +51,10 @@ if __name__ == "__main__":
 
     print('Creating new rules')
     start_time = time.time()
+    status_update_time = time.time()
+    loops = 0
     for address in blocklist.text.splitlines():
+        loops = loops + 1
         if address not in already_blocked:
             blocked_now = blocked_now + 1
             cmd = 'iptables -A INPUT -s {} -j DROP'.format(address)
@@ -51,9 +64,16 @@ if __name__ == "__main__":
                 print('iptables response: ' + str(out))
             if str(out) == '512':
                 print('iptables could not block ipv6 address')
+            if time.time() - status_update_time > 60:
+                status_update_time = time.time()
+                time_str = time.strftime('%H:%M:%S', time.gmtime(time.time() - start_time))
+                print(bcolors.OKGREEN + '')
+                print('Elapsed time: ' + time_str)
+                print('Progress: ' + str(loops) + '/' + str(blocklis_ips))
+                print(str(blocked_now) + ' ip was blocked')
+                print('' + bcolors.ENDC)
 
-    time_str = time.strftime('%H:%M:%S',
-                                              time.gmtime(time.time() - start_time))
+    time_str = time.strftime('%H:%M:%S', time.gmtime(time.time() - start_time))
 
     print('Process finished in ' + time_str)
     print(str(already_blocked_ip) + ' ip was blocked already')
